@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import axiosInstance from "../api/axiosInstance";
 
 export default function UserLogin() {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
-  const [userData, setUserData] = useState();
+
   const navigate = useNavigate();
 
   function handleChange(e) {
@@ -16,10 +17,18 @@ export default function UserLogin() {
       [name]: value,
     }));
   }
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
-    setUserData(formData);
-    setFormData({});
+
+    const res = await axiosInstance.post("/users/login", formData);
+    if (res.status == 200) {
+      navigate("/home");
+      localStorage.setItem("token", res.data.token);
+      setFormData({
+        email: "",
+        password: "",
+      });
+    }
   }
 
   return (

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 export default function UserSignup() {
   const navigate = useNavigate();
@@ -11,14 +12,14 @@ export default function UserSignup() {
     password: "",
     confirm: "",
   });
-  const [userData, setUserData] = useState();
+
   const [error, setError] = useState("");
 
   function handleChange(e) {
     setForm((s) => ({ ...s, [e.target.name]: e.target.value }));
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
     setError("");
     if (!form.firstname || form.firstname.length < 3)
@@ -27,16 +28,29 @@ export default function UserSignup() {
       return setError("Password must be at least 6 characters");
     if (form.password !== form.confirm)
       return setError("Passwords do not match");
-
-    setUserData({
+    const newUser = {
       fullname: {
         firstname: form.firstname,
         lastname: form.lastname,
       },
       email: form.email,
       password: form.password,
-    });
-    navigate("/user-login");
+    };
+    const res = await axios.post(
+      `${import.meta.env.VITE_BASE_URL}/users/register`,
+      newUser
+    );
+
+    if (res.status == 201) {
+      setForm({
+        firstname: "",
+        lastname: "",
+        email: "",
+        password: "",
+        confirm: "",
+      });
+      navigate("/home");
+    }
   }
 
   return (
@@ -107,7 +121,7 @@ export default function UserSignup() {
 
           <button
             type="submit"
-            className="w-full bg-black text-white py-3 rounded-xl font-semibold hover:bg-gray-800 transition-all"
+            className="w-full cursor-pointer bg-black text-white py-3 rounded-xl font-semibold hover:bg-gray-800 transition-all"
           >
             Create account
           </button>
